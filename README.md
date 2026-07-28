@@ -1,5 +1,6 @@
 # interview-prep-panel
 
+[![PyPI](https://img.shields.io/pypi/v/interview-prep-panel)](https://pypi.org/project/interview-prep-panel/)
 [![Claude Code skill](https://img.shields.io/badge/Claude%20Code-skill-8A63D2)](https://claude.com/claude-code)
 [![Coaches](https://img.shields.io/badge/coaches-7-2ea44f)](#the-panel)
 [![Corpus](https://img.shields.io/badge/corpus-4.4M%20words-1f6feb)](#how-it-works--dual-layer-architecture)
