@@ -68,19 +68,32 @@ frameworks and voice from the KB.
 
 ## Install & setup
 
-```bash
-# 1. Clone into your Claude Code skills directory
-git clone https://github.com/little-pond/interview-prep-panel \
-  ~/.claude/skills/interview-prep-panel
+**One-liner** (clones into `~/.claude/skills/` and is ready to use):
 
-# 2. (Optional but recommended) Build Layer 1 — the transcript corpus. Needs yt-dlp.
-cd ~/.claude/skills/interview-prep-panel
-brew install yt-dlp            # or: pipx install yt-dlp
-bash build/pull_transcripts.sh # ~45–60 min, ~940 MB, pulls all coaches
+```bash
+curl -fsSL https://raw.githubusercontent.com/little-pond/interview-prep-panel/main/install.sh | bash
 ```
 
+Re-running it later **updates** the skill. Options:
+
+```bash
+# Install to a custom location
+curl -fsSL .../install.sh | SKILLS_DIR=~/my-skills bash
+
+# Also build the ~940MB transcript corpus during install (needs yt-dlp)
+curl -fsSL .../install.sh | BUILD_CORPUS=1 bash
+```
+
+<details><summary>Prefer to install manually?</summary>
+
+```bash
+git clone https://github.com/little-pond/interview-prep-panel \
+  ~/.claude/skills/interview-prep-panel
+```
+</details>
+
 Then, in Claude Code, just **ask an interview question** — the skill auto-triggers on interview
-intent. Without step 2 it runs KB-only; with it, you get live corpus retrieval.
+intent. It works **KB-only out of the box**; build the corpus (below) for live quote-level retrieval.
 
 ## Using it
 
