@@ -1,63 +1,182 @@
 # interview-prep-panel
 
-A routable **7-coach interview-prep expert panel** with a **fully-local dual-layer knowledge
-architecture** (no auth, no external service), inspired by `30x-growth-marketing-panel`.
+A routable **7-coach interview-prep expert panel** for [Claude Code](https://claude.com/claude-code).
+Each coach is a **digital twin** distilled from their own YouTube channel — you ask an interview
+question, the panel routes it to the right coach(es) and answers in their voice, using their real
+frameworks and verbatim phrasing.
 
-- **Layer 1 — Local transcript corpus (`build/transcripts/{name}/*.txt`):** up to 300 real YouTube
-  videos per coach (~4.4M words total), one clean transcript per file, `grep`-searchable. The
-  deep-retrieval layer — source of truth for what each coach actually said.
-- **Layer 2 — Expert KB (`expert_knowledge/*_kb.md`):** distilled persona protocol — frameworks,
-  signature phrases (verbatim), anti-patterns. Provides voice + structure.
+> Built as a study in **distilling creators into routable digital twins** with a fully-local,
+> no-auth **dual-layer** architecture (retrieval corpus + persona KB).
 
-> The panel originally targeted NotebookLM for Layer 1, but the `notebooklm` CLI's non-browser cookie
-> replay is blocked by Google (a valid fresh login still bounces to sign-in). Layer 1 was moved to a
-> local grep-able corpus instead — same depth (all ~300 videos/coach), no login. The old NotebookLM
-> pipeline (`build/pipeline.sh`) is retained but unused.
+---
+
+## Contents
+- [What it is](#what-it-is)
+- [The panel](#the-panel)
+- [How it works — dual-layer architecture](#how-it-works--dual-layer-architecture)
+- [Install & setup](#install--setup)
+- [Using it](#using-it)
+- [Routing reference](#routing-reference)
+- [Building / refreshing the corpus](#building--refreshing-the-corpus)
+- [Adding a coach](#adding-a-coach)
+- [Repo layout](#repo-layout)
+- [How it was built](#how-it-was-built)
+- [Notes & troubleshooting](#notes--troubleshooting)
+- [Credits](#credits)
+
+---
+
+## What it is
+
+An expert panel you talk to like a coach. Ask *"how do I answer 'tell me about yourself' for a
+marketing role?"* and Madeline Mann's twin answers with her actual 3-part "theme song" structure.
+Ask *"prep me for a PMM interview in two weeks"* and Exponent + Product Alliance + Jeff Su convene a
+roundtable and hand you a plan. It can also **run live mock interviews** and **grade your answers**.
+
+**Who it's for:** anyone prepping for a job interview — behavioral, salary negotiation, or tech
+PM/PMM/SWE rounds.
 
 ## The panel
 
-| Tag | Coach | Channel | Domain |
+| Coach | Tag | Domain | Channel |
 |---|---|---|---|
-| MANN | Madeline Mann | @SelfMadeMillennial | All-round interview Q&A, salary negotiation, job search |
-| CREELY | Bryan Creely | @ALifeAfterLayoff | Recruiter POV, red flags, rejection, negotiation |
-| MCMUNN | Richard McMunn | @CareerVidz | STAR/behavioral model answers, story bank |
-| LACIVITA | Andrew LaCivita | @andylacivita | Storytelling frameworks, exec interviews, strategic framing |
-| SU | Jeff Su | @JeffSu | Concise tactical career/interview/resume, big-tech marketing |
-| EXPONENT | Exponent | @tryexponent | Tech interviews — PM, PMM, SWE, mock interviews |
-| PRODUCTALLIANCE | Product Alliance | @ProductAlliance | PM/PMM interviews at top tech companies |
+| **Madeline Mann** | `MANN` | All-round interview Q&A, salary negotiation, job search | [@SelfMadeMillennial](https://www.youtube.com/@SelfMadeMillennial) |
+| **Bryan Creely** | `CREELY` | Recruiter POV, red flags, decoding rejection, negotiation | [@ALifeAfterLayoff](https://www.youtube.com/@ALifeAfterLayoff) |
+| **Richard McMunn** | `MCMUNN` | STAR/behavioral model answers, story bank | [@CareerVidz](https://www.youtube.com/@CareerVidz) |
+| **Andrew LaCivita** | `LACIVITA` | Storytelling frameworks, exec interviews, strategic framing | [@andylacivita](https://www.youtube.com/@andylacivita) |
+| **Jeff Su** | `SU` | Concise tactical career/interview/resume, big-tech marketing | [@JeffSu](https://www.youtube.com/@JeffSu) |
+| **Exponent** | `EXPONENT` | Tech interviews — PM, PMM, SWE — mock interviews | [@tryexponent](https://www.youtube.com/@tryexponent) |
+| **Product Alliance** | `PRODUCTALLIANCE` | PM/PMM interviews at top tech companies | [@ProductAlliance](https://www.youtube.com/@ProductAlliance) |
 
-## Usage
+## How it works — dual-layer architecture
 
-Invoke the skill and ask an interview question. It routes to the right coach(es), greps their local
-transcript corpus, and answers in their voice. Name a coach ("ask Creely…") for a single deep dive,
-or ask a broad question for a roundtable.
+Fully local. No login, no external service.
 
-## The transcript corpus is NOT in this repo
+- **Layer 1 — Transcript corpus (retrieval).** Up to 300 real videos per coach, one clean
+  transcript per file under `build/transcripts/{name}/`, `grep`-searchable. This is *what the coach
+  actually said*. **Not committed to this repo** (it's ~940 MB of creators' captions) — you
+  regenerate it locally (see [below](#building--refreshing-the-corpus)).
+- **Layer 2 — Expert KB (persona).** `expert_knowledge/{name}_kb.md` — each coach's distilled
+  frameworks, terminology, signature phrases (verbatim), and anti-patterns. **These ship in the
+  repo.**
 
-Layer 1 (`build/transcripts/`, `build/subs/`, samples, `*_corpus.txt`) is **git-ignored** — it's
-~940 MB and contains creators' copyrighted YouTube captions. The repo ships the **recipe**; you
-regenerate the corpus locally:
+**Fusion:** the panel greps the corpus for the substance, then delivers it using the coach's
+frameworks and voice from the KB.
+
+> Works **KB-only out of the box** — the 7 KBs are committed and rich, so the panel is useful the
+> moment you install it. Building the corpus (Layer 1) adds live quote-level retrieval.
+
+## Install & setup
 
 ```bash
-bash build/pull_transcripts.sh          # pull all ~300 videos/coach into build/transcripts/
-bash update_knowledge.sh jeff_su        # re-grab URLs + re-pull one coach
+# 1. Clone into your Claude Code skills directory
+git clone https://github.com/little-pond/interview-prep-panel \
+  ~/.claude/skills/interview-prep-panel
+
+# 2. (Optional but recommended) Build Layer 1 — the transcript corpus. Needs yt-dlp.
+cd ~/.claude/skills/interview-prep-panel
+brew install yt-dlp            # or: pipx install yt-dlp
+bash build/pull_transcripts.sh # ~45–60 min, ~940 MB, pulls all coaches
 ```
 
-Then (re)distill `expert_knowledge/{name}_kb.md` from the corpus (the 7 committed KBs were built this
-way). Add a new coach with `distill_anyone.md`.
+Then, in Claude Code, just **ask an interview question** — the skill auto-triggers on interview
+intent. Without step 2 it runs KB-only; with it, you get live corpus retrieval.
 
-## Layout
+## Using it
+
+See **[PROMPTS.md](./PROMPTS.md)** for a full copy-paste prompt library. The essentials:
+
+- **Auto-route (default):** just ask. `How do I answer "what's your greatest weakness"?`
+- **Single coach:** name them. `Ask Bryan Creely why I keep getting ghosted.`
+- **Roundtable:** ask something broad. `I have a PMM interview in two weeks — full prep plan.`
+- **Mock interview:** `Run a live mock for a PMM role — you interview me and grade me at the end.`
+- **Critique your drafts:** `Grade this answer: [paste]` / `Turn these into one CARL story: [paste].`
+
+You get the best results when you give your **role, company, the job description, and your real
+projects/numbers**. The coaches critique and rewrite what you bring; they don't invent your metrics.
+
+## Routing reference
+
+The panel understands intent, not just keywords. Rough map:
+
+| If you want… | You'll hear from |
+|---|---|
+| General Q&A, salary, "tell me about yourself" | Mann |
+| Why you got rejected / recruiter reality | Creely |
+| A word-for-word model answer | McMunn |
+| Exec/leadership, strategic framing | LaCivita |
+| Crisp frameworks, resume, AI-assisted prep | Su |
+| PM/PMM/SWE case & mock | Exponent |
+| Company-specific PM/PMM loops | Product Alliance |
+
+Multi-intent questions convene a **roundtable** (max 4 coaches) with a synthesis at the end. Full
+routing table is in [`SKILL.md`](./SKILL.md).
+
+## Building / refreshing the corpus
+
+The corpus is git-ignored; regenerate or update it locally:
+
+```bash
+bash build/pull_transcripts.sh        # pull all coaches (~300 videos each)
+bash update_knowledge.sh jeff_su      # re-grab URLs + re-pull ONE coach
+```
+
+To re-distill a coach's KB after refreshing, feed their corpus back through the distillation prompt
+(the 7 committed KBs were each built from a stratified ~95k-word sample of the coach's channel).
+
+## Adding a coach
+
+Use [`distill_anyone.md`](./distill_anyone.md) — change 3 variables (name, channel URL, domain),
+run the pipeline, generate the KB, then add the coach to the panel + routing tables in `SKILL.md`.
+
+## Repo layout
 
 ```
 interview-prep-panel/
-├── SKILL.md                     # routing + dual-layer fusion protocol
-├── README.md
-├── distill_anyone.md            # one-prompt distiller for adding coaches
-├── update_knowledge.sh          # refresh wrapper
-├── expert_knowledge/            # {name}_kb.md persona files (generated)
+├── SKILL.md              # the skill: routing + dual-layer fusion protocol
+├── README.md            # this guide
+├── PROMPTS.md           # copy-paste prompt library
+├── distill_anyone.md    # one-prompt distiller for adding coaches
+├── update_knowledge.sh  # refresh wrapper
+├── expert_knowledge/    # the 7 Persona Protocol KBs  ✅ committed
 └── build/
-    ├── {name}_urls.txt          # yt-dlp URL lists (done)
-    ├── {name}_notebook_id.txt   # saved notebook IDs (after ingest)
-    ├── {name}_retrieval.md      # raw DNA retrieval dumps (after ingest)
-    └── pipeline.sh              # ingestion pipeline
+    ├── *_urls.txt          # yt-dlp URL lists (committed)
+    ├── pull_transcripts.sh # corpus builder (Layer 1)
+    ├── pipeline.sh         # legacy NotebookLM path (unused — see notes)
+    ├── transcripts/        # Layer 1 corpus        🚫 git-ignored (~940MB)
+    └── subs/ · samples/    # raw + sampled captions 🚫 git-ignored
 ```
+
+## How it was built
+
+1. **`yt-dlp`** grabs up to 300 video URLs per channel.
+2. **`build/pull_transcripts.sh`** downloads EN captions (json3) and parses them into one clean
+   transcript per video — a local, grep-able corpus (~4.4M words total).
+3. A **stratified ~95k-word sample** spanning each full channel is distilled (by an LLM, in parallel
+   across all 7 coaches) into a **Persona Protocol KB** — frameworks, verbatim signature phrases,
+   and anti-patterns — grounded strictly in the transcripts.
+4. `SKILL.md` wires the coaches into a router with single-expert and roundtable logic.
+
+## Notes & troubleshooting
+
+- **KB-only vs. full:** the panel works immediately on the committed KBs. Build the corpus for
+  live, quote-level retrieval.
+- **NotebookLM (unused):** the original design targeted NotebookLM for Layer 1, but its CLI's
+  non-browser cookie replay is blocked by Google (a valid fresh login still bounces to sign-in), so
+  Layer 1 was moved to a local grep corpus. `build/pipeline.sh` is retained but unused.
+- **`yt-dlp` errors / missing captions:** some videos (Shorts, music) have no EN captions; the
+  puller skips them with `--ignore-errors`. Update yt-dlp if extraction breaks
+  (`brew upgrade yt-dlp`).
+
+## Credits
+
+Every coach's KB is distilled from their own publicly available YouTube content, for **educational
+interview-prep purposes**. All frameworks and quotes belong to their creators — please support them
+directly:
+[Madeline Mann](https://www.youtube.com/@SelfMadeMillennial) ·
+[Bryan Creely](https://www.youtube.com/@ALifeAfterLayoff) ·
+[Richard McMunn](https://www.youtube.com/@CareerVidz) ·
+[Andrew LaCivita](https://www.youtube.com/@andylacivita) ·
+[Jeff Su](https://www.youtube.com/@JeffSu) ·
+[Exponent](https://www.youtube.com/@tryexponent) ·
+[Product Alliance](https://www.youtube.com/@ProductAlliance)
