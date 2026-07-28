@@ -13,6 +13,14 @@ build/*_notebook_id.txt
 build/*_added.txt
 build/*_retrieval.md
 
+# Python packaging / build artifacts
+dist/
+*.egg-info/
+**/__pycache__/
+*.pyc
+.venv/
+venv/
+
 # macOS / editor cruft
 .DS_Store
 **/.DS_Store

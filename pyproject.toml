@@ -1,0 +1,39 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "interview-prep-panel"
+version = "0.1.0"
+description = "Installer for the interview-prep-panel Claude Code skill — 7 interview-coach digital twins with a local dual-layer (retrieval + persona) architecture."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [{ name = "little-pond" }]
+keywords = ["claude-code", "claude", "interview", "career", "skill", "agent"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/little-pond/interview-prep-panel"
+Repository = "https://github.com/little-pond/interview-prep-panel"
+Issues = "https://github.com/little-pond/interview-prep-panel/issues"
+
+[project.scripts]
+interview-prep-panel = "interview_prep_panel.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["interview_prep_panel"]
+
+[tool.hatch.build.targets.sdist]
+# keep the sdist small — ship only the installer package + docs, never the corpus
+include = [
+  "interview_prep_panel/",
+  "README.md",
+  "PROMPTS.md",
+  "LICENSE",
+  "pyproject.toml",
+]

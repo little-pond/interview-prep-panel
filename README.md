@@ -1,5 +1,12 @@
 # interview-prep-panel
 
+[![Claude Code skill](https://img.shields.io/badge/Claude%20Code-skill-8A63D2)](https://claude.com/claude-code)
+[![Coaches](https://img.shields.io/badge/coaches-7-2ea44f)](#the-panel)
+[![Corpus](https://img.shields.io/badge/corpus-4.4M%20words-1f6feb)](#how-it-works--dual-layer-architecture)
+[![Install](https://img.shields.io/badge/install-curl%20%7C%20pip%20%7C%20git-000000)](#install--setup)
+[![Python](https://img.shields.io/badge/python-3.8%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
 A routable **7-coach interview-prep expert panel** for [Claude Code](https://claude.com/claude-code).
 Each coach is a **digital twin** distilled from their own YouTube channel — you ask an interview
 question, the panel routes it to the right coach(es) and answers in their voice, using their real
@@ -68,7 +75,11 @@ frameworks and voice from the KB.
 
 ## Install & setup
 
-**One-liner** (clones into `~/.claude/skills/` and is ready to use):
+**Requirements:** `git` (curl method) **or** Python 3.8+ (pip method); optional `yt-dlp` only if you build the transcript corpus. macOS/Linux.
+
+### Option 1 · curl one-liner
+
+Clones into `~/.claude/skills/` and is ready to use:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/little-pond/interview-prep-panel/main/install.sh | bash
@@ -84,7 +95,21 @@ curl -fsSL .../install.sh | SKILLS_DIR=~/my-skills bash
 curl -fsSL .../install.sh | BUILD_CORPUS=1 bash
 ```
 
-<details><summary>Prefer to install manually?</summary>
+### Option 2 · pip
+
+Installs a small CLI (Python 3.8+) that fetches the skill into your skills dir:
+
+```bash
+pip install git+https://github.com/little-pond/interview-prep-panel
+interview-prep-panel install                 # → ~/.claude/skills/interview-prep-panel
+interview-prep-panel install --build-corpus  # also pull the corpus (needs yt-dlp)
+```
+
+Re-run `interview-prep-panel install` anytime to update. `interview-prep-panel path` prints where it lives.
+
+### Option 3 · manual
+
+<details><summary>git clone</summary>
 
 ```bash
 git clone https://github.com/little-pond/interview-prep-panel \
