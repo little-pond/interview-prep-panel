@@ -1,0 +1,13 @@
+# Old transcript pipeline artifacts
+pull_transcripts.sh
+*_corpus.txt
+*_subs.log
+*_err.log
+subs/
+transcripts/
+samples/
+
+# Pipeline state / tracking files (local only)
+*_add_errors.log
+*_added_urls.txt
+*_source_ids.txt

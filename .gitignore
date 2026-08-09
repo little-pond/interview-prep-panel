@@ -8,10 +8,8 @@ build/*_corpus.txt
 build/*_subs.log
 build/*_err.log
 
-# NotebookLM pipeline artifacts (unused path — CLI auth blocked by Google)
-build/*_notebook_id.txt
+# NotebookLM pipeline state (local tracking only)
 build/*_added.txt
-build/*_retrieval.md
 
 # Python packaging / build artifacts
 dist/
