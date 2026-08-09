@@ -9,7 +9,7 @@ description: >
   Trigger words: "interview prep", "interview panel", "how do I answer", "tell me about yourself",
   "STAR method", "behavioral interview", "mock interview", "salary negotiation", "why did I get
   rejected", "PM interview", "PMM interview", "recruiter", "what would Madeline Mann say",
-  "ask the panel", "interview roundtable", "/interview-panel".
+  "ask the panel", "interview roundtable", "/interview-panel", "upgrade panel", "/upgrade".
 allowed-tools:
   - Read
   - Bash
@@ -137,6 +137,28 @@ After individual responses, add:
 - **NEVER fabricate quotes, scripts, frameworks, or numbers** not found in the corpus grep or the KB.
 - If the source doesn't cover the topic, extrapolate from the coach's known core principles and **explicitly mark it** with `⚠️`.
 - **NEVER give generic "career-blog" advice** — if you can't say something this specific coach would say, don't say it.
+
+## 🔄 UPGRADE Command
+
+When the user says **"upgrade panel"**, **"upgrade"**, or **`/upgrade`**, run the full re-distillation pipeline:
+
+```bash
+# Step 1 — re-ingest YouTube sources into NotebookLM and run retrieval queries
+cd {skill_base_dir}/build && bash pipeline.sh
+
+# Step 2 — regenerate all 7 KB files from the new retrieval dumps
+cd {skill_base_dir}/build && bash distill.sh
+```
+
+**What upgrade does:**
+- Adds any new videos from each coach's `*_urls.txt` that aren't already in the notebook (resumable — skips already-added URLs)
+- Re-runs the 6 distillation queries against each NotebookLM notebook
+- Regenerates all `expert_knowledge/*_kb.md` files from the fresh retrieval dumps
+- Requires `notebooklm` CLI to be authenticated (`notebooklm list` must succeed first)
+
+**After upgrade:** confirm by showing the new KB file sizes and the notebook source counts from the pipeline summary.
+
+---
 
 ## ⚠️ HARD RULE — PAR IS THE ONLY STORY FRAMEWORK
 
